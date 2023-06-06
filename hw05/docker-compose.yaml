@@ -1,0 +1,57 @@
+version: '3.9'
+  
+networks:  
+  HW05_network:
+
+services:  
+  HW05_MySQL:  
+    image: mysql:latest
+    restart: unless-stopped
+    container_name: HW05_MySQL
+    hostname: HW05_MySQL
+    command:   
+      --default-authentication-plugin=mysql_native_password   
+      --character-set-server=utf8   
+      --collation-server=utf8_general_ci  
+    environment:  
+      MYSQL_ROOT_HOST:  '%'  
+      MYSQL_DATABASE: 'homework05'  
+      MYSQL_USER: 'GB_admin'   
+      MYSQL_PASSWORD: 'GB_admin_password'  
+      MYSQL_ROOT_PASSWORD: 'db-root_password'   
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./HW05_MySQL/base:/var/lib/mysql 
+      - ./HW05_MySQL/upload:/upload
+    deploy:
+      mode: replicated
+      replicas: 2
+    networks:
+     HW05_network:
+  
+
+  HW05_phpmyadmin:  
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    container_name: HW05_phpMyAdmin
+    hostname: HW05_phpMyAdmin
+    ports:  
+      - 28080:80
+    environment:  
+      - PMA_ARBITRARY=1
+      - PMA_USER=root
+      - PMA_PASSWORD=db-root_password
+      - PMA_VERBOSES=HW05_MySQL
+      - PMA_HOSTS=HW05_MySQL
+      - UPLOAD_LIMIT=1G
+      - MEMORY_LIMIT=512m
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    links:  
+      - HW05_MySQL  
+    depends_on:  
+      - HW05_MySQL  
+    networks:  
+     HW05_network:
